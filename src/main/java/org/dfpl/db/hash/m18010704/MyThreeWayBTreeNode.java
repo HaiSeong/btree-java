@@ -3,6 +3,7 @@ package org.dfpl.db.hash.m18010704;
 //package 이름은 org.dfpl.db.hash.m학번 입니다. 
 //지키지 않을 시 반려합니다. 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -13,18 +14,12 @@ public class MyThreeWayBTreeNode {
 	private MyThreeWayBTreeNode parent;
 	private List<Integer> keyList;
 	private List<MyThreeWayBTreeNode> children;
+	private boolean isLeaf = true;
 
 	public MyThreeWayBTreeNode(MyThreeWayBTreeNode parent) {
 		this.parent = parent;
-		keyList = new ArrayList<Integer>(3);
-		children = new ArrayList<MyThreeWayBTreeNode>(4);
-	}
-
-	public boolean isLeaf() {
-		if (children.isEmpty())
-			return true;
-
-		return false;
+		keyList = new ArrayList<Integer>(MAX_KEY_NUM + 1);
+		children = new ArrayList<MyThreeWayBTreeNode>(MAX_CHILD_NUM + 1);
 	}
 
 	public int countTreeSize() {
@@ -74,5 +69,35 @@ public class MyThreeWayBTreeNode {
 
 	public void setChildren(List<MyThreeWayBTreeNode> children) {
 		this.children = children;
+	}
+
+	public boolean isLeaf() {
+		return isLeaf;
+	}
+
+	public void setInternal() {
+		isLeaf = false;
+	}
+
+	public Iterator<Integer> iterator() {
+		if (isLeaf) {
+			return keyList.iterator();
+		}
+		else {
+			Iterator<Integer> iter;
+			ArrayList<Integer> arrayList = new ArrayList<>();
+			for (int i = 0; i < keyList.size(); i++) {
+				iter = children.get(i).iterator();
+				while (iter.hasNext()) {
+					arrayList.add(iter.next());
+				}
+				arrayList.add(keyList.get(i));
+			}
+			iter = children.get(keyList.size()).iterator();
+			while (iter.hasNext()) {
+				arrayList.add(iter.next());
+			}
+			return arrayList.iterator();
+		}
 	}
 }

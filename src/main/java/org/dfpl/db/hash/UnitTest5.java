@@ -17,8 +17,14 @@ public class UnitTest5 {
 		// 과제5는 MyHashSet이 MyThreeWayBTree로 구현되어야만 채점합니다.
 
 		Random r = new Random();
+//		int [] testArr = {86, 1250, 2156, 3338, 2564, 6062, 2990, 2486, 2294, 2369, 5126, 4007, 533, 6926, 6134, 5639};
 		for (int i = 0; i < 10000; i++) {
 			int next = r.nextInt(7000);
+//			next = testArr[i];
+			if (next == 5639)
+				System.out.println("error");
+			if (next == 6134)
+				System.out.println("error");
 			set1.add(next);
 			set2.add(next);
 		}
@@ -29,6 +35,7 @@ public class UnitTest5 {
 		boolean isDifferent = false;
 		for (int set1Value : set1) {
 			if (!set2.contains(set1Value)) {
+				System.out.println(set1Value);
 				isDifferent = true;
 				break;
 			}
