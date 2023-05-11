@@ -36,36 +36,32 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 			return false;
 
 		int e = (int) o;
-//
-//		if (isEmpty())
-//			return false;
-//
-//		MyThreeWayBTreeNode temp = root;
-//
-//		while (temp != null) {
-//			int i = 0;
-//
-//			while (i < temp.getKeyList().size() && e > temp.getKeyList().get(i)) // 키값과 e를 비교
-//				i++;
-//
-//			if (i < temp.getKeyList().size() && e == temp.getKeyList().get(i)) // 키를 찾은 경우
-//				return true;
-//			else { // 키를 찾지 못한 경우
-//				if (temp.isLeaf()) { // 리프 노드까지 이동했는데도 키를 찾지 못한 경우
-//					return temp.getKeyList().contains(e);
-//				}
-//				temp = temp.getChildren().get(i);
-//			}
-//		}
-//
-//		return false;
 
-		Iterator<Integer> iter = iterator();
-		while (iter.hasNext()) {
-			if (iter.next() == e)
+		if (isEmpty())
+			return false;
+
+		MyThreeWayBTreeNode temp = root;
+
+		while (!temp.isLeaf()) {
+			int i = 0;
+
+			while (i < temp.getKeyList().size() && e > temp.getKeyList().get(i)) // 키값과 e를 비교
+				i++;
+
+			if (i < temp.getKeyList().size() && e == temp.getKeyList().get(i)) // 키를 찾은 경우
 				return true;
+
+			temp = temp.getChildren().get(i);
 		}
-		return false;
+
+		return temp.getKeyList().contains(e);
+
+//		Iterator<Integer> iter = iterator();
+//		while (iter.hasNext()) {
+//			if (iter.next() == e)
+//				return true;
+//		}
+//		return false;
 	}
 
 	private MyThreeWayBTreeNode searchNodeT(Integer e) { // 원소를 삽입할 node T를 탐색한다.
@@ -81,7 +77,11 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 				return null; // 중복키 이므로 저장하지 않을것 null 리턴
 			else { // 키를 찾지 못한 경우
 				if (temp.isLeaf()) // 리프 노드 도착
+				{
+					if (temp.getKeyList().contains(e))
+						return null;
 					return temp;
+				}
 
 				temp = temp.getChildren().get(i); // e를 저장할 자식으로 이동
 			}
@@ -99,15 +99,6 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		node.getKeyList().add(i, e);
 	}
 
-	private void InsertKeyIntoInternalNode(MyThreeWayBTreeNode node, Integer e, MyThreeWayBTreeNode right) {
-		int i = 0;
-
-		while (i < node.getKeyList().size() && e > node.getKeyList().get(i)) // 키값과 e를 비교
-			i++;
-
-		node.getKeyList().add(i, e);
-	}
-
 	private void splitLeafNode(MyThreeWayBTreeNode node) {
 		int midIdx = node.getKeyList().size() / 2;
 		int i;
@@ -115,10 +106,10 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		if (node.getParent() == null) { // root 노드인 경우
 			node.setParent(new MyThreeWayBTreeNode(null));
 			root = node.getParent();
-			root.setInternal();
-			root.getKeyList().add(node.getKeyList().get(midIdx));
+			node.getParent().setInternal();
+			node.getParent().getKeyList().add(node.getKeyList().get(midIdx));
 
-			MyThreeWayBTreeNode right = new MyThreeWayBTreeNode(root);
+			MyThreeWayBTreeNode right = new MyThreeWayBTreeNode(node.getParent());
 			for (i = midIdx + 1; i < node.getKeyList().size(); i++)
 				right.getKeyList().add(node.getKeyList().get(i));
 
@@ -156,8 +147,8 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		if (node.getParent() == null) { // root 노드인 경우
 			node.setParent(new MyThreeWayBTreeNode(null));
 			root = node.getParent();
-			root.getKeyList().add(node.getKeyList().get(midIdx));
-			root.setInternal();
+			node.getParent().getKeyList().add(node.getKeyList().get(midIdx));
+			node.getParent().setInternal();
 
 			MyThreeWayBTreeNode right = new MyThreeWayBTreeNode(root);
 			right.setInternal();
@@ -192,7 +183,7 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 			i = 0;
 			while (i < node.getParent().getKeyList().size() && node.getKeyList().get(midIdx) > node.getParent().getKeyList().get(i)) // 키값과 e를 비교
 				i++;
-			node.getParent().getKeyList().add(i, node.getKeyList().get(i));
+			node.getParent().getKeyList().add(i, node.getKeyList().get(midIdx));
 			node.getParent().getChildren().add(i + 1, right);
 
 			node.getKeyList().subList(midIdx, node.getKeyList().size()).clear();
@@ -229,9 +220,34 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		return false;
 	}
 
+	private class MyThreeWayBTreeIterator implements Iterator<Integer> {
+		ArrayList<Integer> arrayList;
+		int curIdx;
+
+		public MyThreeWayBTreeIterator() {
+			arrayList = root.toArray();
+			curIdx = 0;
+		}
+
+		@Override
+		public boolean hasNext() {
+			try {
+				int trial = arrayList.get(curIdx);
+				return true;
+			} catch (IndexOutOfBoundsException e) {
+				return false;
+			}
+		}
+
+		@Override
+		public Integer next() {
+			return arrayList.get(curIdx++);
+		}
+	}
+
 	@Override
 	public Iterator<Integer> iterator() {
-		return root.iterator();
+		return new MyThreeWayBTreeIterator();
 	}
 
 	@Override

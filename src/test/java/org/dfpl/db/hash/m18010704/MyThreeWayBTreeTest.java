@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -47,12 +48,32 @@ public class MyThreeWayBTreeTest {
             testList.add(value);
         }
 
-//        Iterator<Integer> iter = tree.iterator();
-//        while (iter.hasNext())
-//            System.out.print(" " + iter.next());
+        Iterator<Integer> iter = tree.iterator();
+        while (iter.hasNext())
+            System.out.print(" " + iter.next());
 
         for (int i = 0; i < 20000; i++) {
             assertEquals(true, tree.contains(testList.get(i)));
         }
+    }
+
+    @Test
+    public void test3(){
+        int [] arr = {
+                36 ,20 ,80 ,116 ,410 ,116 ,908 ,965 ,1034
+                ,1097 ,1118 ,1991 ,2090 ,2135 ,2843 ,2474 ,2843 ,2873
+        }; // 2474 error
+        for (int e : arr) {
+            if (e == 2474)
+                System.out.println("error");
+//            if (e % 3 == 2) {
+            tree.add(e);
+//                System.out.print(" ," + e);
+//            }
+        }
+
+        for (int e : tree)
+            System.out.print(" " + e);
+        assertEquals(arr.length - 2, tree.size());
     }
 }

@@ -1,6 +1,7 @@
 package org.dfpl.db.hash.m18010704;
 // package 이름은 org.dfpl.db.hash.m학번 입니다. 
 // 지키지 않을 시 반려합니다. 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
@@ -45,7 +46,7 @@ public class MyHashSet<I extends Number> implements Set<Integer> {
 	@Override
 	public boolean contains(Object o) {
 		for (MyThreeWayBTree t : hashTable) {
-			if (t != null && t.contains(o)) // t에 o가 존재하면 true
+			if (t.contains(o)) // t에 o가 존재하면 true
 				return true;
 		}
 		return false;
@@ -53,29 +54,37 @@ public class MyHashSet<I extends Number> implements Set<Integer> {
 
 	@Override
 	public Iterator<Integer> iterator() {
-		return new Iterator<Integer>() {
-			private int i = 0; // hashTable의 인덱스 변수
-			private Iterator<Integer> iterator = (hashTable.length == 0) ? null : hashTable[i].iterator(); // hashTable의 길이가 0이면 읽을 트리가 없으므로 null
+		return new MyHashSetIterator();
+	}
 
-			@Override
-			public boolean hasNext() {
-				if (iterator == null) {
-					return false;
-				}
-				// 비어있지 않은 트리가 나올때까지 i++ 후 hashTable[i].iterator()를 iterator에 넣음
-				while (!iterator.hasNext() && i < hashTable.length - 1) {
-					i++;
-					iterator = hashTable[i].iterator();
-				}
+	private class MyHashSetIterator implements Iterator<Integer> {
+		private int curIdx; // hashTable의 인덱스 변수
+		private ArrayList<Integer> arrayList;
 
-				return iterator.hasNext();
+		public MyHashSetIterator() {
+			curIdx = 0;
+			arrayList = new ArrayList<>();
+			for (MyThreeWayBTree tree : hashTable) {
+				Iterator<Integer> iter = tree.iterator();
+				while (iter.hasNext())
+					arrayList.add(iter.next());
 			}
+		}
 
-			@Override
-			public Integer next() {
-				return iterator.next();
+		@Override
+		public boolean hasNext() {
+			try {
+				int trial = arrayList.get(curIdx);
+				return true;
+			} catch (IndexOutOfBoundsException e) {
+				return false;
 			}
-		};
+		}
+
+		@Override
+		public Integer next() {
+			return arrayList.get(curIdx++);
+		}
 	}
 
 	@Override

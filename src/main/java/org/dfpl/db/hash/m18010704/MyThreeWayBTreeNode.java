@@ -79,25 +79,19 @@ public class MyThreeWayBTreeNode {
 		isLeaf = false;
 	}
 
-	public Iterator<Integer> iterator() {
+	public ArrayList<Integer> toArray() {
 		if (isLeaf) {
-			return keyList.iterator();
+			return (ArrayList<Integer>) keyList;
 		}
-		else {
-			Iterator<Integer> iter;
-			ArrayList<Integer> arrayList = new ArrayList<>();
-			for (int i = 0; i < keyList.size(); i++) {
-				iter = children.get(i).iterator();
-				while (iter.hasNext()) {
-					arrayList.add(iter.next());
-				}
-				arrayList.add(keyList.get(i));
-			}
-			iter = children.get(keyList.size()).iterator();
-			while (iter.hasNext()) {
-				arrayList.add(iter.next());
-			}
-			return arrayList.iterator();
+
+		ArrayList<Integer> arr;
+		ArrayList<Integer> arrayList = new ArrayList<>();
+		for (int i = 0; i < keyList.size(); i++) {
+			arrayList.addAll(children.get(i).toArray());
+			arrayList.add(keyList.get(i));
 		}
+		arrayList.addAll(children.get(keyList.size()).toArray());
+
+		return arrayList;
 	}
 }
