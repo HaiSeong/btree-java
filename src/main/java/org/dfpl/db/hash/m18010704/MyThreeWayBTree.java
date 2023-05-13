@@ -231,7 +231,7 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		return null;
 	}
 
-	private static void reorganize(MyThreeWayBTreeNode t) {
+	private void reorganize(MyThreeWayBTreeNode t) {
 		MyThreeWayBTreeNode p = t.getParent();
 		int idxT = p.getChildren().indexOf(t);
 		MyThreeWayBTreeNode ls = (idxT > 0) ? p.getChildren().get(idxT - 1) : null;
@@ -266,7 +266,7 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 				if (ls != null){
 					ls.getKeyList().add(plv);
 					p.getKeyList().remove((Integer) plv);
-					if (!t.isLeaf())
+					if (!t.isLeaf())00
 						ls.getChildren().addAll(t.getChildren());
 					p.getChildren().remove(t);
 				}
@@ -274,7 +274,8 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 					t.getKeyList().add(prv);
 					p.getKeyList().remove((Integer) prv);
 					t.getKeyList().addAll(rs.getKeyList());
-					t.getChildren().addAll(rs.getChildren());
+					if (!t.isLeaf())
+						t.getChildren().addAll(rs.getChildren());
 					p.getChildren().remove(rs);
 				}
 				reorganize(p);
@@ -299,6 +300,32 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 			reorganize(t);
 		}
 		else { // T가 내부노드인 경우
+			int idxT = t.getKeyList().indexOf(k);
+			MyThreeWayBTreeNode lc = t.getChildren().get(idxT);
+			while (!lc.isLeaf())
+				lc = lc.getChildren().get(lc.getChildren().size() - 1);
+			int lv = lc.getKeyList().get(lc.getKeyList().size() - 1);
+			MyThreeWayBTreeNode rc = t.getChildren().get(idxT + 1);
+			while (!rc.isLeaf())
+				rc = rc.getChildren().get(0);
+			int rv = rc.getKeyList().get(0);
+			if (lc.getKeyList().size() > MIN_KEY_NUM) {
+				t.getKeyList().add(idxT, lv)
+				t.getKeyList().remove((Integer) k);
+			}
+			else if (rc.getKeyList().size() > MIN_KEY_NUM) {
+				t.getKeyList().add(idxT, rv)
+				t.getKeyList().remove((Integer) k);
+			}
+			else {
+				ls.getKeyList().add(plv);
+				p.getKeyList().remove((Integer) plv);
+				if (!t.isLeaf())
+					ls.getChildren().addAll(t.getChildren());
+				p.getChildren().remove(t);
+			}
+			t.getKeyList().add(idxT, )
+			t.getKeyList().remove((Integer) k);
 
 		}
 
