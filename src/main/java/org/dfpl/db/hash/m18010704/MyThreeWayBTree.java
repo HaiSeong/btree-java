@@ -6,6 +6,7 @@ package org.dfpl.db.hash.m18010704;
 import java.util.*;
 
 import static org.dfpl.db.hash.m18010704.MyThreeWayBTreeNode.MAX_KEY_NUM;
+import static org.dfpl.db.hash.m18010704.MyThreeWayBTreeNode.MIN_KEY_NUM;
 
 @SuppressWarnings("unused")
 public class MyThreeWayBTree implements NavigableSet<Integer> {
@@ -24,10 +25,7 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 
 	@Override
 	public boolean isEmpty() {
-		if (size() == 0)
-			return true;
-
-		return false;
+		return size() == 0;
 	}
 
 	@Override
@@ -55,16 +53,9 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		}
 
 		return temp.getKeyList().contains(e);
-
-//		Iterator<Integer> iter = iterator();
-//		while (iter.hasNext()) {
-//			if (iter.next() == e)
-//				return true;
-//		}
-//		return false;
 	}
 
-	private MyThreeWayBTreeNode searchNodeT(Integer e) { // 원소를 삽입할 node T를 탐색한다.
+	private MyThreeWayBTreeNode searchNodeForInsert(Integer e) { // 원소를 삽입할 node T를 탐색한다.
 		MyThreeWayBTreeNode temp = root;
 
 		while (temp != null) {
@@ -132,8 +123,8 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 
 			node.getKeyList().subList(midIdx, node.getKeyList().size()).clear();
 
-			if (node.getParent().getKeyList().size() <= MAX_KEY_NUM)
-				return;
+			if (node.getParent().getKeyList().size() <= MAX_KEY_NUM) {
+			}
 			else
 				splitInternalNode(node.getParent());
 		}
@@ -189,8 +180,8 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 			node.getKeyList().subList(midIdx, node.getKeyList().size()).clear();
 			node.getChildren().subList(midIdx + 1, node.getChildren().size()).clear();
 
-			if (node.getParent().getKeyList().size() <= MAX_KEY_NUM)
-				return;
+			if (node.getParent().getKeyList().size() <= MAX_KEY_NUM) {
+			}
 			else
 				splitInternalNode(node.getParent());
 		}
@@ -199,7 +190,7 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 	@Override
 	public boolean add(Integer e) {
 		// 1. Search a leaf node T, that k to be inserted
-		MyThreeWayBTreeNode t = searchNodeT(e);
+		MyThreeWayBTreeNode t = searchNodeForInsert(e);
 		if (t == null) // 중복키의 경우
 			return false; // 저장 안하고 false리턴
 		InsertKeyIntoLeafNode(t, e);
@@ -214,11 +205,106 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		}
 	}
 
+	private MyThreeWayBTreeNode searchNodeforRemove(Integer k) {
+		MyThreeWayBTreeNode temp = root;
+
+		while (temp != null) {
+			int i = 0;
+
+			while (i < temp.getKeyList().size() && k > temp.getKeyList().get(i)) // 키값과 e를 비교
+				i++;
+
+			if (i < temp.getKeyList().size() && k.equals(temp.getKeyList().get(i))) // 키를 찾은 경우
+				return temp;
+			else {
+				if (temp.isLeaf()) // 리프 노드 도착
+				{
+					if (temp.getKeyList().contains(k))
+						return temp;
+					return null;
+				}
+
+				temp = temp.getChildren().get(i); // e를 저장할 자식으로 이동
+			}
+		}
+
+		return null;
+	}
+
+	private static void reorganize(MyThreeWayBTreeNode t) {
+		MyThreeWayBTreeNode p = t.getParent();
+		int idxT = p.getChildren().indexOf(t);
+		MyThreeWayBTreeNode ls = (idxT > 0) ? p.getChildren().get(idxT - 1) : null;
+		MyThreeWayBTreeNode rs = (idxT < p.getChildren().size() - 1) ? p.getChildren().get(idxT + 1) : null;
+		int lv = (ls != null) ? ls.getKeyList().get(ls.getKeyList().size() - 1) : 0;
+		int rv = (rs != null) ? rs.getKeyList().get(0) : 0;
+		int plv = (ls != null) ? p.getKeyList().get(idxT - 1) : 0;
+		int prv = (rs != null) ? p.getKeyList().get(idxT) : 0;
+
+		if (t.getKeyList().size() < MIN_KEY_NUM) {
+			if (ls != null && ls.getKeyList().size() > MIN_KEY_NUM){
+				t.getKeyList().add(0, plv);
+				p.getKeyList().remove((Integer) plv);
+				p.getKeyList().add(idxT - 1, lv);
+				ls.getKeyList().remove((Integer) lv);
+				if (!t.isLeaf()) {
+					t.getChildren().add(0, ls.getChildren().get(ls.getChildren().size() - 1));
+					ls.getChildren().remove(ls.getChildren().size() - 1);
+				}
+			}
+			else if (rs != null && rs.getKeyList().size() > MIN_KEY_NUM){
+				t.getKeyList().add(prv);
+				p.getKeyList().remove((Integer) prv);
+				p.getKeyList().add(rv);
+				rs.getKeyList().remove((Integer) rv);
+				if (!t.isLeaf()) {
+					t.getChildren().add(rs.getChildren().get(0));
+					rs.getChildren().remove(0);
+				}
+			}
+			else {
+				if (ls != null){
+					ls.getKeyList().add(plv);
+					p.getKeyList().remove((Integer) plv);
+					if (!t.isLeaf())
+						ls.getChildren().addAll(t.getChildren());
+					p.getChildren().remove(t);
+				}
+				else {
+					t.getKeyList().add(prv);
+					p.getKeyList().remove((Integer) prv);
+					t.getKeyList().addAll(rs.getKeyList());
+					t.getChildren().addAll(rs.getChildren());
+					p.getChildren().remove(rs);
+				}
+				reorganize(p);
+
+			}
+		}
+	}
+
 	@Override
 	public boolean remove(Object o) {
-		// TODO Auto-generated method stub
+		if (!(o instanceof Integer))
+			return false;
+
+		int k = (int) o;
+		// 지울 원소 k가 포한됨 노드를 찾음
+		MyThreeWayBTreeNode t = searchNodeforRemove(k);
+		if (t == null)
+			return false; // k를 포함하는 노드 t를 찾지못해 false 리턴
+
+		if (t.isLeaf()) { // T가 리프노드인 경우
+			t.getKeyList().remove((Integer) k);
+			reorganize(t);
+		}
+		else { // T가 내부노드인 경우
+
+		}
+
 		return false;
 	}
+
 
 	private class MyThreeWayBTreeIterator implements Iterator<Integer> {
 		ArrayList<Integer> arrayList;

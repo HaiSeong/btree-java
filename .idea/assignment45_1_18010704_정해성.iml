@@ -20,5 +20,6 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-params:5.9.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-engine:5.9.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.platform:junit-platform-engine:1.9.3" level="project" />
+    <orderEntry type="library" name="Maven: com.openhtmltopdf:openhtmltopdf-core:0.0.1-RC9" level="project" />
   </component>
 </module>

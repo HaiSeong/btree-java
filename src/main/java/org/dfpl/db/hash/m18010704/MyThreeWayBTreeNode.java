@@ -10,6 +10,7 @@ import java.util.List;
 public class MyThreeWayBTreeNode {
 	public static final int MAX_KEY_NUM = 2;
 	public static final int MAX_CHILD_NUM = 3;
+	public static final int MIN_KEY_NUM = 1;
 	// Data Abstraction은 예시일 뿐 자유롭게 B-Tree의 범주 안에서 어느정도 수정가능
 	private MyThreeWayBTreeNode parent;
 	private List<Integer> keyList;

@@ -26,6 +26,11 @@
             <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-core</artifactId>
+            <version>0.0.1-RC9</version>
+        </dependency>
     </dependencies>
 	<build>
 		<pluginManagement>
