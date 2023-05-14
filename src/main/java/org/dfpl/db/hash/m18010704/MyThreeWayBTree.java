@@ -233,6 +233,13 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 
 	private void reorganize(MyThreeWayBTreeNode t) {
 		MyThreeWayBTreeNode p = t.getParent();
+		if (p == null && t.getKeyList().size() == 0){
+			root = t.getChildren().get(0);
+			root.setParent(null);
+			return ;
+		}
+		if (p == null)
+			return;
 		int idxT = p.getChildren().indexOf(t);
 		MyThreeWayBTreeNode ls = (idxT > 0) ? p.getChildren().get(idxT - 1) : null;
 		MyThreeWayBTreeNode rs = (idxT < p.getChildren().size() - 1) ? p.getChildren().get(idxT + 1) : null;
@@ -248,6 +255,8 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 				p.getKeyList().add(idxT - 1, lv);
 				ls.getKeyList().remove((Integer) lv);
 				if (!t.isLeaf()) {
+					for (MyThreeWayBTreeNode node : ls.getChildren())
+						node.setParent(t);
 					t.getChildren().add(0, ls.getChildren().get(ls.getChildren().size() - 1));
 					ls.getChildren().remove(ls.getChildren().size() - 1);
 				}
@@ -258,6 +267,8 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 				p.getKeyList().add(rv);
 				rs.getKeyList().remove((Integer) rv);
 				if (!t.isLeaf()) {
+					for (MyThreeWayBTreeNode node : rs.getChildren())
+						node.setParent(t);
 					t.getChildren().add(rs.getChildren().get(0));
 					rs.getChildren().remove(0);
 				}
@@ -266,20 +277,25 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 				if (ls != null){
 					ls.getKeyList().add(plv);
 					p.getKeyList().remove((Integer) plv);
-					if (!t.isLeaf())00
+					if (!t.isLeaf()){
+						for (MyThreeWayBTreeNode node : t.getChildren())
+							node.setParent(ls);
 						ls.getChildren().addAll(t.getChildren());
+					}
 					p.getChildren().remove(t);
 				}
 				else {
 					t.getKeyList().add(prv);
 					p.getKeyList().remove((Integer) prv);
 					t.getKeyList().addAll(rs.getKeyList());
-					if (!t.isLeaf())
+					if (!t.isLeaf()){
+						for (MyThreeWayBTreeNode node : rs.getChildren())
+							node.setParent(t);
 						t.getChildren().addAll(rs.getChildren());
+					}
 					p.getChildren().remove(rs);
 				}
 				reorganize(p);
-
 			}
 		}
 	}
@@ -310,23 +326,21 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 				rc = rc.getChildren().get(0);
 			int rv = rc.getKeyList().get(0);
 			if (lc.getKeyList().size() > MIN_KEY_NUM) {
-				t.getKeyList().add(idxT, lv)
+				lc.getKeyList().remove((Integer) lv);
+				t.getKeyList().add(idxT, lv);
 				t.getKeyList().remove((Integer) k);
 			}
 			else if (rc.getKeyList().size() > MIN_KEY_NUM) {
-				t.getKeyList().add(idxT, rv)
+				rc.getKeyList().remove((Integer) rv);
+				t.getKeyList().add(idxT, rv);
 				t.getKeyList().remove((Integer) k);
 			}
 			else {
-				ls.getKeyList().add(plv);
-				p.getKeyList().remove((Integer) plv);
-				if (!t.isLeaf())
-					ls.getChildren().addAll(t.getChildren());
-				p.getChildren().remove(t);
+				lc.getKeyList().remove((Integer) lv);
+				t.getKeyList().add(idxT, lv);
+				t.getKeyList().remove((Integer) k);
+				reorganize(lc);
 			}
-			t.getKeyList().add(idxT, )
-			t.getKeyList().remove((Integer) k);
-
 		}
 
 		return false;
@@ -355,6 +369,11 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		@Override
 		public Integer next() {
 			return arrayList.get(curIdx++);
+		}
+
+		@Override
+		public void remove(){
+			arrayList.remove(curIdx);
 		}
 	}
 

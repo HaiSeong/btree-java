@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class UnitTest5 {
 	public static void main(String[] args) {
-		Set<Integer> set1 = new MyHashSet<Integer>();
+		Set<Integer> set1 = new HashSet<Integer>();
 		Set<Integer> set2 = new MyHashSet<Integer>();
 		// 위의 set2이 아니라 학생들의 MyHashSet으로 동일하게 동작해야 함
 		// Set<Integer> set2 = new MyHashSet<Integer>();
