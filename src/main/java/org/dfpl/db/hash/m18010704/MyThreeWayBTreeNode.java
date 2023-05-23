@@ -3,11 +3,11 @@ package org.dfpl.db.hash.m18010704;
 //package 이름은 org.dfpl.db.hash.m학번 입니다. 
 //지키지 않을 시 반려합니다. 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @SuppressWarnings("unused")
 public class MyThreeWayBTreeNode {
+	// 필요한 변수들
 	public static final int MAX_KEY_NUM = 2;
 	public static final int MAX_CHILD_NUM = 3;
 	public static final int MIN_KEY_NUM = 1;
@@ -19,16 +19,18 @@ public class MyThreeWayBTreeNode {
 
 	public MyThreeWayBTreeNode(MyThreeWayBTreeNode parent) {
 		this.parent = parent;
-		keyList = new ArrayList<Integer>(MAX_KEY_NUM + 1);
+		keyList = new ArrayList<Integer>(MAX_KEY_NUM + 1); // 삽입, 삭제중 최대 갯수보다 많이 들어가있는 경우가 있으므로 + 1
 		children = new ArrayList<MyThreeWayBTreeNode>(MAX_CHILD_NUM + 1);
 	}
 
+	// 키의 갯수를 재귀적으로 구하는 함수
 	public int countTreeSize() {
-		int size = keyList.size();
+		int size = keyList.size(); // 자신의 키 갯수에
 
-		if (isLeaf())
+		if (isLeaf()) // 재귀 함수 탈출
 			return size;
 
+		// 재귀적으로 자식의 크기를 더함
 		for (MyThreeWayBTreeNode child : children) {
 			if (child != null)
 				size += child.countTreeSize();
@@ -80,18 +82,18 @@ public class MyThreeWayBTreeNode {
 		isLeaf = false;
 	}
 
+	// array로 리턴하는 함수 (재귀를 이용)
 	public ArrayList<Integer> toArray() {
-		if (isLeaf) {
+		if (isLeaf) { // 리프노드면
 			return (ArrayList<Integer>) keyList;
 		}
 
-		ArrayList<Integer> arr;
-		ArrayList<Integer> arrayList = new ArrayList<>();
-		for (int i = 0; i < keyList.size(); i++) {
-			arrayList.addAll(children.get(i).toArray());
-			arrayList.add(keyList.get(i));
+		ArrayList<Integer> arrayList = new ArrayList<>(); // arrayList 생성
+		for (int i = 0; i < keyList.size(); i++) { // 순서에 맞게
+			arrayList.addAll(children.get(i).toArray());  // 자식에 대해서 재귀
+			arrayList.add(keyList.get(i)); // 자식1과 자식2 사이의 키 추가
 		}
-		arrayList.addAll(children.get(keyList.size()).toArray());
+		arrayList.addAll(children.get(keyList.size()).toArray()); // 재귀
 
 		return arrayList;
 	}

@@ -40,7 +40,7 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 
 		MyThreeWayBTreeNode temp = root;
 
-		while (!temp.isLeaf()) {
+		while (!temp.isLeaf()) { // 내부노드인경우 반복
 			int i = 0;
 
 			while (i < temp.getKeyList().size() && e > temp.getKeyList().get(i)) // 키값과 e를 비교
@@ -49,7 +49,7 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 			if (i < temp.getKeyList().size() && e == temp.getKeyList().get(i)) // 키를 찾은 경우
 				return true;
 
-			temp = temp.getChildren().get(i);
+			temp = temp.getChildren().get(i); // 자식으로 이동
 		}
 
 		return temp.getKeyList().contains(e);
@@ -90,99 +90,67 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		node.getKeyList().add(i, e);
 	}
 
-	private void splitLeafNode(MyThreeWayBTreeNode node) {
-		int midIdx = node.getKeyList().size() / 2;
-		int i;
-
-		if (node.getParent() == null) { // root 노드인 경우
-			node.setParent(new MyThreeWayBTreeNode(null));
-			root = node.getParent();
-			node.getParent().setInternal();
-			node.getParent().getKeyList().add(node.getKeyList().get(midIdx));
-
-			MyThreeWayBTreeNode right = new MyThreeWayBTreeNode(node.getParent());
-			for (i = midIdx + 1; i < node.getKeyList().size(); i++)
-				right.getKeyList().add(node.getKeyList().get(i));
-
-			node.getKeyList().subList(midIdx, node.getKeyList().size()).clear();
-
-			node.getParent().getChildren().add(node);
-			node.getParent().getChildren().add(right);
-		}
-		else {
-			MyThreeWayBTreeNode right = new MyThreeWayBTreeNode(node.getParent());
-			for (i = midIdx + 1; i < node.getKeyList().size(); i++){
-				right.getKeyList().add(node.getKeyList().get(i));
-			}
-
-			i = 0;
-			while (i < node.getParent().getKeyList().size() && node.getKeyList().get(midIdx) > node.getParent().getKeyList().get(i)) // 키값과 e를 비교
-				i++;
-			node.getParent().getKeyList().add(i, node.getKeyList().get(midIdx));
-			node.getParent().getChildren().add(i + 1, right);
-
-			node.getKeyList().subList(midIdx, node.getKeyList().size()).clear();
-
-			if (node.getParent().getKeyList().size() <= MAX_KEY_NUM) {
-			}
-			else
-				splitInternalNode(node.getParent());
-		}
-	}
-
 	private void splitInternalNode(MyThreeWayBTreeNode node) {
 		int midIdx = node.getKeyList().size() / 2;
 		int i;
 
-
-		if (node.getParent() == null) { // root 노드인 경우
-			node.setParent(new MyThreeWayBTreeNode(null));
+		if (node.getParent() == null) { // root 노드를 재조정 하는 경우
+			node.setParent(new MyThreeWayBTreeNode(null)); // root에 빈노드를 생성하고 내부노드로 설정
+			node.getParent().setInternal();
 			root = node.getParent();
 			node.getParent().getKeyList().add(node.getKeyList().get(midIdx));
-			node.getParent().setInternal();
 
-			MyThreeWayBTreeNode right = new MyThreeWayBTreeNode(root);
-			right.setInternal();
-			for (i = midIdx + 1; i < node.getKeyList().size(); i++)
+			MyThreeWayBTreeNode right = new MyThreeWayBTreeNode(node.getParent()); // 새로운 노드 생성
+			if (!node.isLeaf())
+				right.setInternal();
+
+			for (i = midIdx + 1; i < node.getKeyList().size(); i++) // right로 key 리스트 복사
 				right.getKeyList().add(node.getKeyList().get(i));
 
-			for (i = midIdx + 1; i < node.getChildren().size(); i++)
-				right.getChildren().add(node.getChildren().get(i));
+			node.getKeyList().subList(midIdx, node.getKeyList().size()).clear(); // right로 복사한 원소 삭제
 
-			for (MyThreeWayBTreeNode rightChild : right.getChildren())
-				rightChild.setParent(right);
+			if (!node.isLeaf()) { // 내부노드인 경우 자식 노드들 복사
+				for (i = midIdx + 1; i < node.getChildren().size(); i++)
+					right.getChildren().add(node.getChildren().get(i));
 
-			node.getKeyList().subList(midIdx, node.getKeyList().size()).clear();
-			node.getChildren().subList(midIdx + 1, node.getChildren().size()).clear();
+				for (MyThreeWayBTreeNode rightChild : right.getChildren())
+					rightChild.setParent(right);
 
-			node.getParent().getChildren().add(node);
+				node.getChildren().subList(midIdx + 1, node.getChildren().size()).clear(); // right로 복사한 자식 삭제
+			}
+
+			node.getParent().getChildren().add(node); // 부모(루트노드)에 추가하기
 			node.getParent().getChildren().add(right);
 
 		}
 		else {
-			MyThreeWayBTreeNode right = new MyThreeWayBTreeNode(node.getParent());
-			right.setInternal();
-			for (i = midIdx + 1; i < node.getKeyList().size(); i++)
+			MyThreeWayBTreeNode right = new MyThreeWayBTreeNode(node.getParent()); // 새로운 노드 생성
+			if (!node.isLeaf())
+				right.setInternal();
+
+			for (i = midIdx + 1; i < node.getKeyList().size(); i++) // right로 key 리스트 복사
 				right.getKeyList().add(node.getKeyList().get(i));
 
-			for (i = midIdx + 1; i < node.getChildren().size(); i++)
-				right.getChildren().add(node.getChildren().get(i));
+			if (!node.isLeaf()) { // 내부노드인 경우 자식 노드들 복사
+				for (i = midIdx + 1; i < node.getChildren().size(); i++)
+					right.getChildren().add(node.getChildren().get(i));
 
-			for (MyThreeWayBTreeNode rightChild : right.getChildren())
-				rightChild.setParent(right);
+				for (MyThreeWayBTreeNode rightChild : right.getChildren())
+					rightChild.setParent(right);
+			}
 
 			i = 0;
-			while (i < node.getParent().getKeyList().size() && node.getKeyList().get(midIdx) > node.getParent().getKeyList().get(i)) // 키값과 e를 비교
+			while (i < node.getParent().getKeyList().size() && node.getKeyList().get(midIdx) > node.getParent().getKeyList().get(i)) // 키값과 e를 비교 (mid에 추가할 위치 찾기)
 				i++;
-			node.getParent().getKeyList().add(i, node.getKeyList().get(midIdx));
-			node.getParent().getChildren().add(i + 1, right);
+			node.getParent().getKeyList().add(i, node.getKeyList().get(midIdx)); // mid는 부모로 올리기
+			node.getParent().getChildren().add(i + 1, right); // 부모에 새로 만든 노드 추가
 
-			node.getKeyList().subList(midIdx, node.getKeyList().size()).clear();
-			node.getChildren().subList(midIdx + 1, node.getChildren().size()).clear();
+			node.getKeyList().subList(midIdx, node.getKeyList().size()).clear(); // right로 복사한 원소 삭제
 
-			if (node.getParent().getKeyList().size() <= MAX_KEY_NUM) {
-			}
-			else
+			if (!node.isLeaf()) // right로 복사한 자식 삭제
+				node.getChildren().subList(midIdx + 1, node.getChildren().size()).clear();
+
+			if (node.getParent().getKeyList().size() > MAX_KEY_NUM) // 부모가 조건을 만족하지 못화면 부모를 분할
 				splitInternalNode(node.getParent());
 		}
 	}
@@ -193,19 +161,19 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		MyThreeWayBTreeNode t = searchNodeForInsert(e);
 		if (t == null) // 중복키의 경우
 			return false; // 저장 안하고 false리턴
-		InsertKeyIntoLeafNode(t, e);
+		InsertKeyIntoLeafNode(t, e); // 리프노드 t에 e를 삽입
 
 		// 2. if |T| <= m - 1, |T| = the number of keys in T
 		int i = 0;
-		if (t.getKeyList().size() <= MAX_KEY_NUM)
+		if (t.getKeyList().size() <= MAX_KEY_NUM) // 조건을 만족하면 종료
 			return true;
 		else { // 3. else
-			splitLeafNode(t);
+			splitInternalNode(t); // 아니면 분할
 			return true;
 		}
 	}
 
-	private MyThreeWayBTreeNode searchNodeforRemove(Integer k) {
+	private MyThreeWayBTreeNode searchNodeForRemove(Integer k) {
 		MyThreeWayBTreeNode temp = root;
 
 		while (temp != null) {
@@ -219,7 +187,7 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 			else {
 				if (temp.isLeaf()) // 리프 노드 도착
 				{
-					if (temp.getKeyList().contains(k))
+					if (temp.getKeyList().contains(k)) // leaf에 k가 있었다면
 						return temp;
 					return null;
 				}
@@ -232,70 +200,82 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 	}
 
 	private void reorganize(MyThreeWayBTreeNode t) {
-		MyThreeWayBTreeNode p = t.getParent();
-		if (p == null && t.getKeyList().size() == 0){
+		MyThreeWayBTreeNode p = t.getParent(); // 부모 노드
+		if (p == null && t.isLeaf() && t.getKeyList().size() == 0){ // 부모노드가 루트노드이면서 리프노드인 경우 인데 아무것도 없는경우 : 비어있는 트리이므로 리턴
+			return;
+		}
+		else if (p == null && t.getKeyList().size() < MIN_KEY_NUM){ // 부모노드가 루트노드인경우인데 루트노드가 빈 경우 : 루트노드를 재설정 하기
 			root = t.getChildren().get(0);
 			root.setParent(null);
 			return ;
 		}
-		if (p == null)
+		else if (p == null) // 루트노드를 만난경우 : 리턴
 			return;
-		int idxT = p.getChildren().indexOf(t);
-		MyThreeWayBTreeNode ls = (idxT > 0) ? p.getChildren().get(idxT - 1) : null;
-		MyThreeWayBTreeNode rs = (idxT < p.getChildren().size() - 1) ? p.getChildren().get(idxT + 1) : null;
-		int lv = (ls != null) ? ls.getKeyList().get(ls.getKeyList().size() - 1) : 0;
-		int rv = (rs != null) ? rs.getKeyList().get(0) : 0;
-		int plv = (ls != null) ? p.getKeyList().get(idxT - 1) : 0;
-		int prv = (rs != null) ? p.getKeyList().get(idxT) : 0;
 
-		if (t.getKeyList().size() < MIN_KEY_NUM) {
-			if (ls != null && ls.getKeyList().size() > MIN_KEY_NUM){
-				t.getKeyList().add(0, plv);
+		int idxT = p.getChildren().indexOf(t);
+		MyThreeWayBTreeNode ls = (idxT > 0) ? p.getChildren().get(idxT - 1) : null; // 왼쪽 형제
+		MyThreeWayBTreeNode rs = (idxT < p.getChildren().size() - 1) ? p.getChildren().get(idxT + 1) : null; // 오른쪽 형제
+		int lv, rv, plv, prv;
+
+		if (t.getKeyList().size() < MIN_KEY_NUM) { // MIN KEY 속성이 맞지 않는 경우에 조정 필요 : 속성을 만족하는 경우 함수 종료
+			if (ls != null && ls.getKeyList().size() > MIN_KEY_NUM) { // 왼쪽 형제가 여유있는경우
+				lv = ls.getKeyList().get(ls.getKeyList().size() - 1); // lv, plv 찾기
+				plv = p.getKeyList().get(idxT - 1) ;
+
+				t.getKeyList().add(0, plv); // lv 를 부모에게 주고 plv 받아오기
 				p.getKeyList().remove((Integer) plv);
 				p.getKeyList().add(idxT - 1, lv);
 				ls.getKeyList().remove((Integer) lv);
-				if (!t.isLeaf()) {
-					for (MyThreeWayBTreeNode node : ls.getChildren())
-						node.setParent(t);
+
+				if (!t.isLeaf()) { // 내부 노드의 경우 lv에 딸려있던 자식 받아오기
+					ls.getChildren().get(ls.getChildren().size() - 1).setParent(t);
 					t.getChildren().add(0, ls.getChildren().get(ls.getChildren().size() - 1));
 					ls.getChildren().remove(ls.getChildren().size() - 1);
 				}
 			}
-			else if (rs != null && rs.getKeyList().size() > MIN_KEY_NUM){
-				t.getKeyList().add(prv);
+			else if (rs != null && rs.getKeyList().size() > MIN_KEY_NUM){ // 오른쪽 형제가 여유있는경우
+				rv = rs.getKeyList().get(0); // rv, prv 찾기
+				prv = p.getKeyList().get(idxT);
+
+				t.getKeyList().add(prv); // rv 를 부모에게 주고 prv 받아오기
 				p.getKeyList().remove((Integer) prv);
-				p.getKeyList().add(rv);
+				p.getKeyList().add(idxT, rv);
 				rs.getKeyList().remove((Integer) rv);
-				if (!t.isLeaf()) {
-					for (MyThreeWayBTreeNode node : rs.getChildren())
-						node.setParent(t);
+
+				if (!t.isLeaf()) { // 내부 노드의 경우 rv에 딸려있던 자식 받아오기
+					rs.getChildren().get(0).setParent(t);
 					t.getChildren().add(rs.getChildren().get(0));
 					rs.getChildren().remove(0);
 				}
 			}
-			else {
-				if (ls != null){
-					ls.getKeyList().add(plv);
+			else { // 두 형제 모두 여유가 없는경우 : 합병
+				if (ls != null){ // 왼쪽 형제와 합치기 : ls 에 t를 합침
+					plv = p.getKeyList().get(idxT - 1) ;
+
+					ls.getKeyList().add(plv); // 부모에게 plv 받아오기
 					p.getKeyList().remove((Integer) plv);
-					if (!t.isLeaf()){
+
+					if (!t.isLeaf()){ // 내부노드의 경우 t의 자식들 데려오기
 						for (MyThreeWayBTreeNode node : t.getChildren())
 							node.setParent(ls);
-						ls.getChildren().addAll(t.getChildren());
+						ls.getChildren().addAll(t.getChildren()); // t의 키값 받아오기
 					}
-					p.getChildren().remove(t);
+					p.getChildren().remove(t); // 노드 t 지움
 				}
-				else {
-					t.getKeyList().add(prv);
+				else { // 오른쪽 형제와 합치기 : t 에 rs를 합침
+					prv = p.getKeyList().get(idxT);
+
+					t.getKeyList().add(prv); // 부모에게 prv 받아오기
 					p.getKeyList().remove((Integer) prv);
-					t.getKeyList().addAll(rs.getKeyList());
-					if (!t.isLeaf()){
+					t.getKeyList().addAll(rs.getKeyList()); // rs의 원소들 t에 붙이기
+					if (!t.isLeaf()){ // 내부노드의 경우 rs의 자식들 데려오기
 						for (MyThreeWayBTreeNode node : rs.getChildren())
 							node.setParent(t);
 						t.getChildren().addAll(rs.getChildren());
 					}
-					p.getChildren().remove(rs);
+					p.getChildren().remove(rs); // rs 지움
 				}
-				reorganize(p);
+				reorganize(p); // 합병후 부모 재조정
 			}
 		}
 	}
@@ -307,35 +287,35 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 
 		int k = (int) o;
 		// 지울 원소 k가 포한됨 노드를 찾음
-		MyThreeWayBTreeNode t = searchNodeforRemove(k);
+		MyThreeWayBTreeNode t = searchNodeForRemove(k);
 		if (t == null)
 			return false; // k를 포함하는 노드 t를 찾지못해 false 리턴
 
 		if (t.isLeaf()) { // T가 리프노드인 경우
-			t.getKeyList().remove((Integer) k);
-			reorganize(t);
+			t.getKeyList().remove((Integer) k); // 리프노드에서 삭제
+			reorganize(t); // 필요시 재조정
 		}
 		else { // T가 내부노드인 경우
 			int idxT = t.getKeyList().indexOf(k);
-			MyThreeWayBTreeNode lc = t.getChildren().get(idxT);
+			MyThreeWayBTreeNode lc = t.getChildren().get(idxT); // 선임자가 있는 노드 찾기
 			while (!lc.isLeaf())
 				lc = lc.getChildren().get(lc.getChildren().size() - 1);
-			int lv = lc.getKeyList().get(lc.getKeyList().size() - 1);
-			MyThreeWayBTreeNode rc = t.getChildren().get(idxT + 1);
+			int lv = lc.getKeyList().get(lc.getKeyList().size() - 1); // 선임자
+			MyThreeWayBTreeNode rc = t.getChildren().get(idxT + 1); // 후임자가 있는 노드 찾기
 			while (!rc.isLeaf())
 				rc = rc.getChildren().get(0);
-			int rv = rc.getKeyList().get(0);
-			if (lc.getKeyList().size() > MIN_KEY_NUM) {
+			int rv = rc.getKeyList().get(0); // 후임자
+			if (lc.getKeyList().size() > MIN_KEY_NUM) { // 선임자가 있는 노드에 여유가 있으면 k를 지우고 선임자를 가져옴
 				lc.getKeyList().remove((Integer) lv);
 				t.getKeyList().add(idxT, lv);
 				t.getKeyList().remove((Integer) k);
 			}
-			else if (rc.getKeyList().size() > MIN_KEY_NUM) {
+			else if (rc.getKeyList().size() > MIN_KEY_NUM) { // 후임자가 있는 노드에 여유가 있으면 k를 지우고 후임자를 가져옴
 				rc.getKeyList().remove((Integer) rv);
 				t.getKeyList().add(idxT, rv);
 				t.getKeyList().remove((Integer) k);
 			}
-			else {
+			else { // 둘다 여유가 없으면 우선 선임자를 가져오고 균형을 맞춤
 				lc.getKeyList().remove((Integer) lv);
 				t.getKeyList().add(idxT, lv);
 				t.getKeyList().remove((Integer) k);
@@ -352,14 +332,14 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 		int curIdx;
 
 		public MyThreeWayBTreeIterator() {
-			arrayList = root.toArray();
+			arrayList = root.toArray(); // Node의 toArray 사용
 			curIdx = 0;
 		}
 
 		@Override
 		public boolean hasNext() {
 			try {
-				int trial = arrayList.get(curIdx);
+				int trial = arrayList.get(curIdx); // 현제의 인덱스 리턴
 				return true;
 			} catch (IndexOutOfBoundsException e) {
 				return false;

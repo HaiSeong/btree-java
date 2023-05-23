@@ -58,16 +58,16 @@ public class MyHashSet<I extends Number> implements Set<Integer> {
 	}
 
 	private class MyHashSetIterator implements Iterator<Integer> {
-		private int curIdx; // hashTable의 인덱스 변수
+		private int curIdx; // 인덱스 변수
 		private ArrayList<Integer> arrayList;
 
 		public MyHashSetIterator() {
 			curIdx = 0;
 			arrayList = new ArrayList<>();
 			for (MyThreeWayBTree tree : hashTable) {
-				Iterator<Integer> iter = tree.iterator();
-				while (iter.hasNext())
-					arrayList.add(iter.next());
+				// arrayList에 hashTable의 모든 트리의 원소를 삽입
+				for (Integer e : tree)
+					arrayList.add(e);
 			}
 		}
 
@@ -89,7 +89,7 @@ public class MyHashSet<I extends Number> implements Set<Integer> {
 
 	@Override
 	public boolean add(Integer e) {
-		hashTable[e % hashTable.length].add(e);
+		hashTable[e % hashTable.length].add(e); // 해쉬함수 결과에 해당하는 인덱스에서 처리
 		return true; // add 가 잘 수행되었다는 의미
 	}
 
@@ -99,7 +99,7 @@ public class MyHashSet<I extends Number> implements Set<Integer> {
 			return false; // 정수가 아닌 경우 삭제 작업 x
 
 		int valueToRemove = (int) o;
-		hashTable[valueToRemove % hashTable.length].remove(valueToRemove);
+		hashTable[valueToRemove % hashTable.length].remove(valueToRemove); // 해쉬함수 결과에 해당하는 인덱스에서 처리
 		return true;
 	}
 
