@@ -91,7 +91,11 @@ public class MyThreeWayBTree implements NavigableSet<Integer> {
 	}
 
 	private void splitInternalNode(MyThreeWayBTreeNode node) {
-		int midIdx = node.getKeyList().size() / 2;
+		int midIdx;
+		if(node.getKeyList().size()%2==0)
+				midIdx= node.getKeyList().size() / 2-1;
+		else
+			midIdx=node.getKeyList().size()/2;
 		int i;
 
 		if (node.getParent() == null) { // root 노드를 재조정 하는 경우
